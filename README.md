@@ -5,7 +5,12 @@
 ## Requeriments
 
 protobuf and gogoprotobuf are required.
-see: (protobuf)[https://github.com/google/protobuf] and (gogoprotobuf)[https://github.com/google/protobuf]
+
+see: 
+
+(protobuf)[https://github.com/google/protobuf] 
+
+(gogoprotobuf)[https://github.com/google/protobuf]
 
 ## Installation
 
