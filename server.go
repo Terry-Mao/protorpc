@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 /*
-	Package rpc provides access to the exported methods of an object across a
+	Package protorpc provides access to the exported methods of an object across a
 	network or other I/O connection.  A server registers an object, making it visible
 	as a service with the name of the type of the object.  After registration, exported
 	methods of the object will be accessible remotely.  A server may register multiple
@@ -14,15 +14,14 @@
 	other methods will be ignored:
 
 		- the method is exported.
-		- the method has two arguments, both exported (or builtin) types.
-		- the method's second argument is a pointer.
+		- the method has two arguments, both exported and implements proto.Message types.
 		- the method has return type error.
 
 	In effect, the method must look schematically like
 
-		func (t *T) MethodName(argType T1, replyType *T2) error
+		func (t *T) MethodName(argType *T1, replyType *T2) error
 
-	where T, T1 and T2 can be marshaled by encoding/gob.
+	where T, T1 and T2 can be marshaled by gogoproto.
 	These requirements apply even if a different codec is used.
 	(In the future, these requirements may soften for custom codecs.)
 
@@ -47,13 +46,12 @@
 	launches the call asynchronously and signals completion using the Call
 	structure's Done channel.
 
-	Unless an explicit codec is set up, package encoding/gob is used to
-	transport the data.
-
 	Here is a simple example.  A server wishes to export an object of type Arith:
 
 		package server
 
+		// must use xxx.proto generate the Args and Quotient xxx.proto.go,
+		// this is a simple examples here.
 		type Args struct {
 			A, B int
 		}
