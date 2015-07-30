@@ -337,7 +337,8 @@ func (client *Client) CallWithTimeout(serviceMethod string, args proto.Message, 
 	}
 }
 
-func (client *Client) Ping() {
+// Ping for ping rpc server and reconnect with it when it's crash.
+func (client *Client) Ping(dstClient **Client) {
 	var (
 		retires int
 		tmp     *Client
@@ -353,7 +354,7 @@ func (client *Client) Ping() {
 			}
 			if tmp, err = Dial(client.network, client.address); err == nil {
 				retires = 0
-				client = tmp
+				*dstClient = tmp
 			} else {
 				retires++
 			}
