@@ -355,6 +355,7 @@ func (client *Client) Ping(dstClient **Client) {
 			if tmp, err = Dial(client.network, client.address); err == nil {
 				retires = 0
 				*dstClient = tmp
+				client = tmp
 			} else {
 				retires++
 			}
