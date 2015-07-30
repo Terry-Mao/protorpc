@@ -7,7 +7,7 @@ package test
 import (
 	"errors"
 	"fmt"
-	"github.com/Terry-Mao/goim/protorpc"
+	"github.com/Terry-Mao/protorpc"
 	"github.com/gogo/protobuf/proto"
 	"net"
 	"runtime"

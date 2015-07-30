@@ -13,6 +13,7 @@ import (
 	"net"
 	"net/http"
 	"sync"
+	"time"
 )
 
 // ServerError represents an error that has been returned from
@@ -23,7 +24,10 @@ func (e ServerError) Error() string {
 	return string(e)
 }
 
-var ErrShutdown = errors.New("connection is shut down")
+var (
+	ErrShutdown = errors.New("connection is shut down")
+	ErrTimeout  = errors.New("call timeout")
+)
 
 // Call represents an active RPC.
 type Call struct {
@@ -312,4 +316,14 @@ func (client *Client) Go(serviceMethod string, args proto.Message, reply proto.M
 func (client *Client) Call(serviceMethod string, args proto.Message, reply proto.Message) error {
 	call := <-client.Go(serviceMethod, args, reply, make(chan *Call, 1)).Done
 	return call.Error
+}
+
+// CallWithTimeout invokes the named function, waits for it to complete or timeout, and returns its error status.
+func (client *Client) CallWithTimeout(serviceMethod string, args proto.Message, reply proto.Message, d time.Duration) error {
+	select {
+	case call := <-client.Go(serviceMethod, args, reply, make(chan *Call, 1)).Done:
+		return call.Error
+	case <-time.After(d):
+		return ErrTimeout
+	}
 }
