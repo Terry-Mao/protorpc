@@ -10,7 +10,7 @@ see:
 
 [protobuf](https://github.com/google/protobuf)
 
-[gogoprotobuf](https://github.com/google/protobuf)
+[gogoprotobuf](https://github.com/gogo/protobuf)
 
 ## Installation
 
