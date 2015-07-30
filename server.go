@@ -173,6 +173,12 @@ func NewServer() *Server {
 // DefaultServer is the default instance of *Server.
 var DefaultServer = NewServer()
 
+func init() {
+	if err := DefaultServer.RegisterName(pingService, DefaultPinger); err != nil {
+		panic(ErrProtoRPC)
+	}
+}
+
 // Is this an exported - upper case - name?
 func isExported(name string) bool {
 	rune, _ := utf8.DecodeRuneInString(name)
@@ -544,7 +550,9 @@ func ServeRequest(codec ServerCodec) error {
 // Accept accepts connections on the listener and serves requests
 // to DefaultServer for each incoming connection.
 // Accept blocks; the caller typically invokes it in a go statement.
-func Accept(lis net.Listener) { DefaultServer.Accept(lis) }
+func Accept(lis net.Listener) {
+	DefaultServer.Accept(lis)
+}
 
 // Can connect to RPC service using HTTP CONNECT to rpcPath.
 var connected = "200 Connected to Go RPC"

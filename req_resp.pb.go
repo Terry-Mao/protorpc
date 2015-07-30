@@ -11,6 +11,7 @@
 	It has these top-level messages:
 		Request
 		Response
+		Ping
 */
 package protorpc
 
@@ -42,6 +43,13 @@ type Response struct {
 func (m *Response) Reset()         { *m = Response{} }
 func (m *Response) String() string { return proto.CompactTextString(m) }
 func (*Response) ProtoMessage()    {}
+
+type Ping struct {
+}
+
+func (m *Ping) Reset()         { *m = Ping{} }
+func (m *Ping) String() string { return proto.CompactTextString(m) }
+func (*Ping) ProtoMessage()    {}
 
 func init() {
 }
@@ -225,6 +233,47 @@ func (m *Response) Unmarshal(data []byte) error {
 
 	return nil
 }
+func (m *Ping) Unmarshal(data []byte) error {
+	l := len(data)
+	iNdEx := 0
+	for iNdEx < l {
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := data[iNdEx]
+			iNdEx++
+			wire |= (uint64(b) & 0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		switch fieldNum {
+		default:
+			var sizeOfWire int
+			for {
+				sizeOfWire++
+				wire >>= 7
+				if wire == 0 {
+					break
+				}
+			}
+			iNdEx -= sizeOfWire
+			skippy, err := skipReqResp(data[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	return nil
+}
 func skipReqResp(data []byte) (n int, err error) {
 	l := len(data)
 	iNdEx := 0
@@ -339,6 +388,12 @@ func (m *Response) Size() (n int) {
 	return n
 }
 
+func (m *Ping) Size() (n int) {
+	var l int
+	_ = l
+	return n
+}
+
 func sovReqResp(x uint64) (n int) {
 	for {
 		n++
@@ -413,6 +468,24 @@ func (m *Response) MarshalTo(data []byte) (n int, err error) {
 		i = encodeVarintReqResp(data, i, uint64(len(m.Error)))
 		i += copy(data[i:], m.Error)
 	}
+	return i, nil
+}
+
+func (m *Ping) Marshal() (data []byte, err error) {
+	size := m.Size()
+	data = make([]byte, size)
+	n, err := m.MarshalTo(data)
+	if err != nil {
+		return nil, err
+	}
+	return data[:n], nil
+}
+
+func (m *Ping) MarshalTo(data []byte) (n int, err error) {
+	var i int
+	_ = i
+	var l int
+	_ = l
 	return i, nil
 }
 

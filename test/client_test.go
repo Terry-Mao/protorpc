@@ -76,6 +76,7 @@ func TestProtoError(t *testing.T) {
 		panic(err)
 	}
 
+	go client.Ping()
 	var reply Reply
 	err = client.Call("S.Recv", nil, &reply)
 	if err != nil {

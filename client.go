@@ -53,6 +53,9 @@ type Client struct {
 	pending  map[uint64]*Call
 	closing  bool // user has called Close
 	shutdown bool // server has told us to stop
+
+	network string
+	address string
 }
 
 // A ClientCodec implements writing of RPC requests and
@@ -253,7 +256,10 @@ func DialHTTPPath(network, address, path string) (*Client, error) {
 	// before switching to RPC protocol.
 	resp, err := http.ReadResponse(bufio.NewReader(conn), &http.Request{Method: "CONNECT"})
 	if err == nil && resp.Status == connected {
-		return NewClient(conn), nil
+		client := NewClient(conn)
+		client.network = network
+		client.address = address
+		return client, nil
 	}
 	if err == nil {
 		err = errors.New("unexpected HTTP response: " + resp.Status)
@@ -273,7 +279,10 @@ func Dial(network, address string) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewClient(conn), nil
+	client := NewClient(conn)
+	client.network = network
+	client.address = address
+	return client, nil
 }
 
 func (client *Client) Close() error {
@@ -325,5 +334,33 @@ func (client *Client) CallWithTimeout(serviceMethod string, args proto.Message, 
 		return call.Error
 	case <-time.After(d):
 		return ErrTimeout
+	}
+}
+
+func (client *Client) Ping() {
+	var (
+		retires int
+		tmp     *Client
+		err     error
+		call    *Call
+		ch      = make(chan *Call, 1)
+	)
+	for {
+		call = <-client.Go(pingServiceMethod, nil, nil, ch).Done
+		if call.Error != nil {
+			if call.Error == ErrShutdown {
+				return
+			}
+			if tmp, err = Dial(client.network, client.address); err == nil {
+				retires = 0
+				client = tmp
+			} else {
+				retires++
+			}
+		} else {
+			// ping ok, reset retires
+			retires = 0
+		}
+		time.Sleep(backoff(retires))
 	}
 }

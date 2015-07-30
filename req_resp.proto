@@ -18,3 +18,6 @@ message Response {
     uint64     Seq = 2;
     string     Error = 3;
 }
+
+message Ping {
+}
