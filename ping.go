@@ -2,7 +2,6 @@ package protorpc
 
 import (
 	"errors"
-	"log"
 	"time"
 )
 
@@ -35,25 +34,22 @@ func Reconnect(dst **Client, quit chan struct{}, network, address string) {
 	)
 	for {
 		select {
+		case <-quit:
+			return
 		case call = <-client.Go(pingServiceMethod, nil, nil, ch).Done:
 			if call.Error != nil {
 				if tmp, err = Dial(network, address); err == nil {
 					retires = 0
 					*dst = tmp
 					client = tmp
-					log.Println("reconnect ok")
 				} else {
-					log.Println("reconnect retry")
 					retires++
 				}
 			} else {
 				// ping ok, reset retires
-				log.Println("reconnect reset ok")
 				retires = 0
 			}
 			time.Sleep(backoff(retires))
-		case <-quit:
-			return
 		}
 	}
 }
