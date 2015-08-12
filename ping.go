@@ -36,8 +36,11 @@ func Reconnect(dst **Client, quit chan struct{}, network, address string) {
 		select {
 		case <-quit:
 			return
-		case call = <-client.Go(pingServiceMethod, nil, nil, ch).Done:
-			if call.Error != nil {
+		default:
+			if client != nil {
+				call = <-client.Go(pingServiceMethod, nil, nil, ch).Done
+			}
+			if client == nil || call.Error != nil {
 				if tmp, err = Dial(network, address); err == nil {
 					retires = 0
 					*dst = tmp
@@ -49,7 +52,7 @@ func Reconnect(dst **Client, quit chan struct{}, network, address string) {
 				// ping ok, reset retires
 				retires = 0
 			}
-			time.Sleep(backoff(retires))
 		}
+		time.Sleep(backoff(retires))
 	}
 }

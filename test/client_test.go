@@ -75,8 +75,7 @@ func TestProtoError(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-
-	go client.Ping(&client)
+	go protorpc.Reconnect(&client, make(chan struct{}, 1), "tcp", listen.Addr().String())
 	var reply Reply
 	err = client.Call("S.Recv", nil, &reply)
 	if err != nil {
